@@ -130,15 +130,10 @@ What method did you use to store the aws credentials? What are some other
 options?
 
 > Previously, I would manage credentials as env vars in my `~/.zshrc`. As a result I couldn't commit this to a .dotfiles repo, but it gave me the ability to swap between creds by changing which variables are active for a given account.
-
 > export AWS_ACCESS_KEY_ID=$IVL_AWS_ACCESS_KEY_ID
-
 > export AWS_SECRET_ACCESS_KEY=$IVL_AWS_SECRET_ACCESS_KEY
-
 > export IVL_AWS_ACCESS_KEY_ID='AKIA1234567890...S'
-
 > export IVL_AWS_SECRET_ACCESS_KEY='f12345678901...w'
-
 > This is a very manual process and much more cumbersome than the aws-vault stuff below.
 
 ###### Question 0.1.1: 2
@@ -150,7 +145,7 @@ Which AWS environment variable cannot be set in order to run the
 
 ##### Option 2: Using AWS Vault to automatically handle your temporary tokens
 
-> I found a GUI version of this at https://github.com/Noovolari/leapp
+> I found a GUI version of this at [Leapp](https://github.com/Noovolari/leapp).
 
 If you would rather not have to manually get STS tokens and add them to your
 credentials file you can use [aws-vault](https://github.com/99designs/aws-vault).
@@ -184,6 +179,7 @@ You want to set an alias in your .bashrc or .zshrc to something like this:
 [toplevel]
 whoami = sts get-caller-identity --query Arn --output text
 ```
+
 > This will allow me to use `aws whoami` in place of commands that ask for the owner-arn
 
 #### Lab 0.1.2: GitHub
@@ -214,7 +210,6 @@ CLI commands as you did in [lab 0.1.1](#lab-011-aws-access-keys):
 - `describe-instances`
 
 > `aws cloud9 create-environment-ec2 --name my-demo-env --description "My demonstration development environment." --instance-type t2.micro --subnet-id subnet-1fab8aEX --automatic-stop-time-minutes 60 --owner-arn arn:aws:iam::123456789012:user/MyDemoUser`
-
 > In order to use this command we will first need to provide a value for `--subnet-id` so I will need to create a VPC.
 > To do this I will first run the command:
 
@@ -237,6 +232,7 @@ VPC Creation: `aws ec2 create-vpc --cidr-block 10.0.0.0/16 --no-amazon-provided-
     State: pending
     VpcId: vpc-0768b9b45373f3b83
 ```
+
 > This returns the follwing YAML-Stream when we create the Subnet
 
 Subnet Creation: `aws ec2 create-subnet --cidr-block 10.10.0.0/18 --availability-zone us-west-2a --vpc-id vpc-0768b9b45373f3b83 --output yaml-stream`
@@ -257,13 +253,16 @@ Subnet Creation: `aws ec2 create-subnet --cidr-block 10.10.0.0/18 --availability
     SubnetId: subnet-081b02e0cb7082ca5
     VpcId: vpc-0768b9b45373f3b83
 ```
+
 > Now that we have a subnet, we can create our cloud9 instance
 
-`aws cloud9 create-environment-ec2 --description "demo dev env for Matthew Morgan" --name mcm-dev-env --instance-type t3.micro --automatic-stop-time-minutes 30 --owner-arn `aws whoami` --subnet-id subnet-081b02e0cb7082ca5`
+```shell
+aws cloud9 create-environment-ec2 --description "demo dev env for Matthew Morgan" --name mcm-dev-env --instance-type t3.micro --automatic-stop-time-minutes 30 --owner-arn `aws whoami` --subnet-id subnet-081b02e0cb7082ca5
+```
 
 > Which will return an Environment id like {"environmentId": "079d761679ee4236aeade608e1e2e4c1"}.
-
 > From this point we can query our environments with `aws cloud9 describe-environments --environment-id 079d761679ee4236aeade608e1e2e4c1` which will return something like:
+
 ```yaml
 - environments:
   - arn: arn:aws:cloud9:us-west-2:324320755747:environment:079d761679ee4236aeade608e1e2e4c1
@@ -277,8 +276,8 @@ Subnet Creation: `aws ec2 create-subnet --cidr-block 10.10.0.0/18 --availability
     ownerArn: arn:aws:iam::324320755747:user/matthew.morgan.labs
     type: ec2
 ```
-> And we can connect to our ide by going to https://us-west-2.console.aws.amazon.com/cloud9/ide/{environmentId}
 
+> And we can connect to our ide by going to <https://us-west-2.console.aws.amazon.com/cloud9/ide/{environmentId}>.
 > Of course this is much harder than it needs to be. We could automate this futher using CloudFormation, Terraform, Ansible, etc.
 > Example of a cloudformation Template for Cloud9 below:
 
@@ -320,6 +319,7 @@ Outputs:
         - Ref: IDE
     Description: Cloud9 environment        
 ```
+
 > If you have issues connecting to the environment, it's quite likely you created a private subnet without an igw- route, and thus cannot access your resources.
 > Or apparently I created my subnet in us-west-2d which doesn't support t2 instances.  Fascinating.
 > Much more painful than it should have been.
