@@ -1,15 +1,3 @@
-Parameters:
-  BucketNameVar:
-    Type: String
-    Description: 'Name of the Bucket to be created. Must be globally-unique.'
-
 Resources:
-  S3Bucket:
+  MyS3Bucket:
     Type: 'AWS::S3::Bucket'
-    Properties:
-      BucketName:
-        Fn::Sub:
-          - '${AccountId}-${Region}-${BucketNameVar}'
-          - { AccountId: !Ref AWS::AccountId, Region: !Ref AWS::Region }
-
-Description: 'Create an S3 Bucket'

@@ -3,6 +3,6 @@
 STACKNAME="mcm-01-cloudformation"
 TESTFILE="file://MinimalS3.yml"
 
-BUCKETNAMEVAR="$STACKNAME_$(date +"%m%d%Y%H%M")"
+#BUCKETNAMEVAR="$STACKNAME_$(date +"%m%d%Y%H%M")"
 
-aws cloudformation update-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters ParameterKey=BucketNameVar,ParameterValue=$BUCKETNAMEVAR
+aws cloudformation update-stack --stack-name $STACKNAME --template-body $TESTFILE
