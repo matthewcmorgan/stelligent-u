@@ -1,0 +1,3 @@
+BucketNameVar:
+  Type: String
+  Default: !Ref "AWS::StackName" 
