@@ -1,7 +1,7 @@
 #!/bin/bash
 # Use this script as a quick execute shim for testing cfn stacks
 STACKNAME="mcm-01-cloudformation"
-TESTFILE="file://MinimalS3.yml"
-PARAMFILE="file://s3params.yml"
+TESTFILE="file://S3viaParams.yml"
+PARAMFILE="file://s3params.json"
 
-aws cloudformation update-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters $PARAMFILE
+aws cloudformation create-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters $PARAMFILE
