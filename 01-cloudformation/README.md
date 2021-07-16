@@ -160,6 +160,8 @@ name.
 
 _Why do we prefer the YAML format for CFN templates?_
 
+> YAML is designed to be human readable, vs JSON which is optimized for machine readability, though even that is questionable.  Additionally, YAML allows comments, a critical function that is missing from JSON.
+
 #### Question: Protecting Resources
 
 _What else can you do to prevent resources in a stack from being deleted?_
@@ -168,10 +170,14 @@ See [DeletionPolicy](https://aws.amazon.com/premiumsupport/knowledge-center/clou
 
 _How is that different from applying Termination Protection?_
 
+> Policies define whom can interact, and how they do so. Termination Protection is a simple flag on a resource. Policies can prevent updates, Terminiation Protection will only prevent the stack from being deleted.
+
 #### Task: String Substitution
 
 Demonstrate 2 ways to code string combination/substitution using
 built-in CFN functions.
+
+> The two functions are `!Join [delimiter, [list of items to join]]` and `!Sub String`.
 
 ## Lesson 1.2: Integration with Other AWS Resources
 

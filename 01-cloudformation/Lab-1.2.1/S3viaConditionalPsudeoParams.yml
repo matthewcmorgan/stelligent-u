@@ -1,0 +1,24 @@
+Parameters:
+  BucketNameVar:
+    Default: 'mcm-01-cfn-s3'
+    Description: 'Name of the Bucket to be created. Must be globally-unique.'
+    Type: String
+Conditions:
+  IsPrefferedRegion: !Equals 
+    - !Ref AWS::Region
+    - 'us-west-2' # My Preferred Region
+Resources:
+  MyCoolNewS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !If 
+        - IsPrefferedRegion
+        - !Join 
+          - '-' 
+          - - !Ref 'AWS::AccountId' 
+            - !Ref BucketNameVar 
+        - !Join 
+          - '-'
+          - - !Ref 'AWS::Region'
+            - !Ref BucketNameVar
+Description: 'Create an S3 Bucket. Prefix bucket name with AccountId if in Preffered Region, else prefix with Region name.'
