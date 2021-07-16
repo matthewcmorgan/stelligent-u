@@ -1,6 +1,6 @@
 [
     {
       "ParameterKey": "BucketNameVar",
-      "ParameterValue": "fancy_unique_bucket_name_goes_here-mcm"
+      "ParameterValue": "fancy-unique-bucket-name-goes-here-mcm"
     }
 ]
