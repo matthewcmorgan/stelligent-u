@@ -3,4 +3,4 @@ Parameters:
     Default: 'mcm-01-cfn-s3'
     Description: 'Name of the Bucket to be created. Must be globally-unique.'
     Type: String
-    ParameterProperty: "fancy_unique_bucket_name_goes_here-mcm"
+    ParameterProperty: "fancy-unique-bucket-name-goes-here-mcm"
