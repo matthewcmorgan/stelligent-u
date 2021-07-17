@@ -17,9 +17,8 @@ Resources:
         Password: !Ref IAMPassword
       UserName: !Ref IAMUsername
   NewIAMPolicyFromCFN:
-    Type: AWS::IAM::Policy
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: readOnS3
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
