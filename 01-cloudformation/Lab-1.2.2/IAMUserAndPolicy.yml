@@ -17,9 +17,8 @@ Resources:
         Password: !Ref IAMPassword
       UserName: !Ref IAMUsername
   NewIAMPolicyFromCFN:
-    Type: AWS::IAM::Policy
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: readOnS3
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -29,4 +28,10 @@ Resources:
             Resource: arn:aws:s3:::*
       Users: 
         - !Ref NewUserFromCFN
+Outputs:
+  NewPolicyArn:
+    Description: The ARN of the Managed Policy
+    Value: !Ref NewIAMPolicyFromCFN
+    Export:
+      Name: NewManagedPolicyArn
 Description: 'Create an IAM User with an IAM Managed Policy allowing Read access to S3.'
