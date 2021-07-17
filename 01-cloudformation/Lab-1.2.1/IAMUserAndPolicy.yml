@@ -1,24 +1,32 @@
 Parameters:
-  BucketNameVar:
-    Default: 'mcm-01-cfn-s3'
-    Description: 'Name of the Bucket to be created. Must be globally-unique.'
+  IAMPassword:
+    NoEcho: true
+    Default: 'myP@ssw0rd'
+    Description: 'Password for IAM user to be created.'
     Type: String
-Conditions:
-  IsPrefferedRegion: !Equals 
-    - !Ref AWS::Region
-    - 'us-west-2' # My Preferred Region
+  IAMUsername:
+    Default: 'this.is.a.nice.user.name'
+    Description: 'Username for IAM user to be created.'
+    Type: String
 Resources:
-  MyCoolNewS3Bucket:
-    Type: 'AWS::S3::Bucket'
+  NewUserFromCFN:
+    Type: 'AWS::IAM::User'
     Properties:
-      BucketName: !If 
-        - IsPrefferedRegion
-        - !Join 
-          - '-' 
-          - - !Ref 'AWS::AccountId' 
-            - !Ref BucketNameVar 
-        - !Join 
-          - '-'
-          - - !Ref 'AWS::Region'
-            - !Ref BucketNameVar
-Description: 'Create an S3 Bucket. Prefix bucket name with AccountId if in Preffered Region, else prefix with Region name.'
+      Path: "/"
+      LoginProfile:
+        Password: !Ref IAMPassword
+      UserName: !Ref IAMUsername
+  NewIAMPolicyFromCFN:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: readOnS3
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:x-amz-grant-read
+            Resource: arn:aws:s3:::*
+      Users: 
+        - !Ref NewUserFromCFN
+Description: 'Create an IAM User with an IAM Managed Policy allowing Read access to S3.'

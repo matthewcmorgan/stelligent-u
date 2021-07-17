@@ -1,6 +1,10 @@
 [
     {
-      "ParameterKey": "BucketNameVar",
-      "ParameterValue": "fancy-unique-bucket-name-goes-here-mcm"
+      "ParameterKey": "IAMPassword",
+      "ParameterValue": "fancy-unique-P@ssw0rD-name-goes-here-mcm"
+    },
+    {
+      "ParameterKey": "IAMUsername",
+      "ParameterValue": "fancy-unique-username-name-goes-here-mcm"
     }
 ]
