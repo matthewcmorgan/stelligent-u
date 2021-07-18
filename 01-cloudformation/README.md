@@ -233,6 +233,8 @@ Delete your CFN stacks in the same order you created them in. Did you
 succeed? If not, describe how you would _identify_ the problem, and
 resolve it yourself.
 
+> I delete as I go, so in most cases I don't think this would have worked, as you can't delete the results of lab 1.2.1 until the stacks that import those resources are also deleted.  This is a common pattern in AWS where dependent resources block parent resources from being destroyed.  Like a VPC, where you can't delete it until all resources within it are also destroyed. Or an S3 bucket which can't be removed until the contents are gone.  Thankfully, AWS is usually pretty good in it's error messages indicating why a thing didn't succeed, so follow the logs.
+
 ### Retrospective 1.2
 
 #### Task: Policy Tester
