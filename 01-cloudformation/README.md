@@ -242,6 +242,10 @@ resolve it yourself.
 Show how to use the IAM policy tester to demonstrate that the user
 cannot perform 'Put' actions on any S3 buckets.
 
+> something with `aws iam simulate-custom-policy`, the problem I have run into is that I can't just provide the ARN of the policy I created.
+> I think I need to first run `aws iam get-context-keys-for-custom-policy`, there it requires either the file locally or in s3, or the document as a string.
+> Assuming those obstacles are resolved, the simulate requires setting forth the test cases as actions against resources?  I am not clear on how to accomplish this.
+
 #### Task: SSM Parameter Store
 
 Using the AWS Console, create a Systems Manager Parameter Store

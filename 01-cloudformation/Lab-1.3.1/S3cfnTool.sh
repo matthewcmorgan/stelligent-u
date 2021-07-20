@@ -1,212 +1,97 @@
 #!/bin/bash
-set -e
+
+STACKNAME="mcm-01-cloudformation-Lab1-3-1"
+TESTFILE="file://S3viaConditionalPsuedoParams.yml"
+PARAMFILE="file://s3params.json"
+REGION="$2" || 'us-east-1'
+CAPABILITIES='CAPABILITY_NAMED_IAM'
+# AWS_PAGER=""
+# AWS_CLI_PAGER=""
 
 help() {
-	echo "htotheizzo - a simple script that makes updating/upgrading homebrew or apt, gems, pip packages, and node packages so much easier"
+	echo
+	echo "S3cfnTool - a simple script that re-uses one CloudFormation template to deploy a single S3 bucket."
+	echo "USAGE: S3cfnTool create 'us-west-2'"
+	echo "VERBS: create describe update no-protect protect destroy"
+	echo
 }
 
-# Choose a user account to use
-get_user() {
-	if [ -z "${TARGET_USER-}" ]; then
-		mapfile -t options < <(find /home/* -maxdepth 0 -printf "%f\\n" -type d)
-		# if there is only one option just use that user
-		if [ "${#options[@]}" -eq "1" ]; then
-			readonly TARGET_USER="${options[0]}"
-			echo "Using user account: ${TARGET_USER}"
-			return
-		fi
-
-		# iterate through the user options and print them
-		PS3='Which user account should be used? '
-
-		select opt in "${options[@]}"; do
-			readonly TARGET_USER=$opt
-			break
-		done
-	fi
+create() {
+	echo
+	echo "Creating $STACKNAME in $REGION"
+	aws cloudformation create-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters $PARAMFILE --capabilities $CAPABILITIES --region "$REGION" | jq
+	echo "Creation of $STACKNAME in $REGION submitted. Use describe for logs."
+	echo
 }
 
-dcleanup(){
-	local containers
-	mapfile -t containers < <(docker ps --filter status=exited -q 2>/dev/null)
-	docker rm "${containers[@]}" 2>/dev/null
-	local images
-	mapfile -t images < <(docker images --filter dangling=true -q 2>/dev/null)
-	docker rmi "${images[@]}" 2>/dev/null
-}
-
-update_docker() {
+describe() {
 	echo
-	echo "Updating docker..."
+	echo "Outputting events of $STACKNAME in $REGION."
+	aws cloudformation describe-stack-events --stack-name $STACKNAME --region "$REGION" | jq
+	echo "No more events. Run again."
 	echo
-
-	# stop docker
-	dcleanup || true
-	systemctl stop docker || true
-
-	# Include contributed completions
-	mkdir -p /etc/bash_completion.d
-	curl -sSL -o /etc/bash_completion.d/docker https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker
-
-	# get the binary
-	local tmp_tar=/tmp/docker.tgz
-	local binary_uri="https://download.docker.com/linux/static/test/x86_64"
-	local docker_version
-	docker_version=$(curl -sSL "https://api.github.com/repos/docker/docker-ce/releases/latest" | jq --raw-output .tag_name)
-	docker_version=${docker_version#v}
-	# local docker_sha256
-	# docker_sha256=$(curl -sSL "${binary_uri}/docker-${docker_version}.tgz.sha256" | awk '{print $1}')
-	(
-	set -x
-	curl -fSL "${binary_uri}/docker-${docker_version}.tgz" -o "$tmp_tar"
-	# echo "${docker_sha256} ${tmp_tar}" | sha256sum -c -
-	tar -C /usr/local/bin --strip-components 1 -xzvf "$tmp_tar"
-	rm "${tmp_tar}"
-	# remove binaries we don't need
-	rm -f /usr/local/bin/docker-containerd*
-	docker -v
-	)
-	chmod +x /usr/local/bin/docker*
-
-	# enable and start docker
-	systemctl daemon-reload
-	systemctl enable docker
-	systemctl start docker || true
-}
-
-update_containerd() {
-	echo
-	echo "Updating containerd..."
-	echo
-
-	local tmp_tar=/tmp/containerd.tar.gz
-	local containerd_version
-	containerd_version=$(curl -sSL "https://api.github.com/repos/containerd/containerd/releases" | jq --raw-output .[0].tag_name)
-	containerd_version=${containerd_version#v}
-	local binary_uri="https://github.com/containerd/containerd/releases/download/v${containerd_version}/containerd-${containerd_version}-linux-amd64.tar.gz"
-	(
-	set -x
-	curl -fSL "$binary_uri" -o "$tmp_tar"
-	tar -C /usr/local/bin --strip-components 1 -xzvf "$tmp_tar"
-	rm "$tmp_tar"
-	containerd -v
-	)
-
-	# enable and start containerd
-	systemctl daemon-reload
-	systemctl enable containerd
-	systemctl start containerd
-}
-
-update_runc() {
-	echo
-	echo "Updating runc..."
-	echo
-
-	local runc_version
-	runc_version=$(curl -sSL "https://api.github.com/repos/opencontainers/runc/releases" | jq --raw-output .[0].tag_name)
-	runc_version=${runc_version#v}
-	local binary_uri="https://github.com/opencontainers/runc/releases/download/v${runc_version}/runc.amd64"
-	(
-	set -x
-	curl -fSL "$binary_uri" -o "/sbin/runc"
-	chmod +x /sbin/runc
-	runc -v
-	)
-}
-
-update_apt() {
-	echo
-	echo "Updating apt.."
-	echo
-	apt -y update
-	apt -y upgrade
-	apt -y autoremove
-	apt -y autoclean
-	apt -y clean
-	rm -rf /var/lib/apt/lists/*
-}
-
-update_kubectl() {
-	echo
-	echo "Updating kubectl..."
-	echo
-	KUBERNETES_VERSION=$(curl -sSL https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-	curl -sSL "https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubectl" > /usr/local/bin/kubectl
-	chmod +x /usr/local/bin/kubectl
-	echo "kuebctl $(kubectl version --client --short)"
-}
-
-update_rust() {
-	echo
-	echo "Updating rust..."
-	echo
-
-	command -v rustup >/dev/null 2>&1 || { echo >&2 "I require rust but it's not installed.  Aborting."; return; }
-
-	su -c "rustup update" "$TARGET_USER"
-	su -c "rustc --version" "$TARGET_USER"
-	su -c "rustup completions bash" > "/etc/bash_completion.d/rustup"
-}
-
-update_bios() {
-	echo
-	echo "Checking for BIOS updates..."
-	echo
-	fwupdmgr refresh --force
-	fwupdmgr get-updates
-	fwupdmgr update
-}
-
-update_firmware() {
-	echo
-	echo "Updating firmware..."
-	echo
-	update-firmware
-
-	echo
-	echo "Updating iwlwifi..."
-	echo
-	update-iwlwifi
 }
 
 update() {
-	echo "htotheizzo is running the update functions"
+	echo
+	echo "Updating stack $STACKNAME in $REGION."
+	aws cloudformation update-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters $PARAMFILE --capabilities $CAPABILITIES --region "$REGION" | jq
+	echo "Update submitted. Use describe for logs."
+	echo
+}
 
-	# detect the OS for the update functions
-	if [[ "$OSTYPE" == "linux-gnu" ]]; then
-		echo "Hey there Linux user. You rule."
+no-protect() {
+	local CMD="aws cloudformation update-termination-problems --stack-name $STACKNAME --no-enable-termination-protection --region $REGION | jq"
+	echo
+	echo "Removing Deletion Protection on $STACKNAME. Are you sure? (Y/n)"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) $CMD; break;;
+			No ) exit;;
+		esac
+	done
+	echo "Deletion Proection Removal has been requested."
+	echo
+}
 
-		# on linux, make sure they are the super user
-		if [ "$UID" -ne 0 ]; then
-			echo "Please run as root"
-			exit 1
-		fi
+protect() {
+	echo
+	echo "Enabling deletion proection for stack: $STACKNAME"
+	aws cloudformation update-termination-protection --stack-name $STACKNAME --enable-termination-protection --region "$REGION" | jq
+	echo "Deletion Protection enabled."
+	echo
+}
 
-		# update
-		get_user;
-		update_apt;
-		update_docker;
-		update_containerd;
-		update_runc;
-		update_kubectl;
-		update_rust;
-		update_firmware;
-		update_bios;
-	else
-		echo "We don't have update functions for OS: ${OSTYPE}"
-		echo "Moving on..."
-	fi
-
-	echo "htotheizzo is complete, you got 99 problems but updates ain't one"
+destroy() {
+	local CMD="aws cloudformation delete-stack --stack-name $STACKNAME --region $REGION | jq"
+	echo
+	echo "Destroying $STACKNAME. ARE YOU SURE? (Y/n)"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) $CMD; break;;
+			No ) exit;;
+		esac
+	done
+	echo "Delete stack request submitted. Use describe for logs."
+	echo
 }
 
 main() {
-	local arg=$1
-	if [[ -n "$arg" ]]; then
-		help
-	else
+	local cmd=$1
+	if [[ $cmd == "create" ]]; then
+		create
+	elif [[ $cmd == "describe" ]]; then
+		describe
+	elif [[ $cmd == "update" ]]; then
 		update
+	elif [[ $cmd == "no-protect" ]]; then
+		no-protect
+	elif [[ $cmd == "protect" ]]; then
+		protect
+	elif [[ $cmd == "destroy" ]]; then
+		destroy
+	elif [[ -n "$cmd" ]]; then
+		help
 	fi
 }
 

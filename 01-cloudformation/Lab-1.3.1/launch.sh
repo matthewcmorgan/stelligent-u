@@ -1,13 +1,23 @@
 #!/bin/bash
 # Use this script as a quick execute shim for testing cfn stacks
-STACKNAME="mcm-01-cloudformation-Lab6"
-TESTFILE="file://NewUserImports.yml"
-PARAMFILE="file://IAMparams.json"
-REGION='us-west-2'
-CAPABILITIES='CAPABILITY_NAMED_IAM'
 
-aws cloudformation create-stack --stack-name $STACKNAME --template-body $TESTFILE --parameters $PARAMFILE --region $REGION --capabilities $CAPABILITIES 
+REGIONFILE="regions.json"
+REGIONS="$(cat $REGIONFILE | jq '.Regions[].RegionName' | grep us-)"
+SCRIPT="./s3cfnTool.sh"
 
-# aws cloudformation update-termination-protection --stack-name $STACKNAME --enable-termination-protection | --no-enable-termination-protection
+getRegions() {
+    echo
+    echo "Attempting to invoke $SCRIPT."
+    for region in $REGIONS; do
+        /bin/bash -c "$SCRIPT describe $region"
+    done
+}
 
-# aws cloudformation describe-stack-events --stack-name $STACKNAME
+main() {
+    # local cmd=$1
+    # if [[ -n $cmd ]]; then
+        getRegions
+    # fi
+}
+
+main "$@"
