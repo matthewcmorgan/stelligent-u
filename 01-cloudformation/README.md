@@ -293,6 +293,7 @@ deploy _a single S3 bucket_.
   but has a default value.
 
 #### Lab 1.3.2: Coding with AWS SDKs
+> FYI - I started this Lab, as you can see in the cfn-tool directory, but this can be a timesink.  I can do this, without question, but I'd like to hold off for now unless the tool this create continues to get expanded beyond this lab.
 
 Repeat the exercise in the previous lab, with two modifications:
 
@@ -316,6 +317,7 @@ Also adhere to these criteria:
 - Use only a single shell command to execute your code script.
 
 #### Lab 1.3.3: Enhancing the Code
+> See note for the above.
 
 Add code that provides for the deletion of your CFN stacks using the
 same configuration list, and then delete the stacks using that new
@@ -330,12 +332,16 @@ functionality. Query S3 to ensure that the buckets have been deleted.
 _Can you list 4 features of CloudFormation that help make a CFN template
 portable code?_
 
+> Psuedo-Parameters, Intrinsic Functions, Cross-stack references, and modules.
+
 #### Task: DRYer Code
 
 How reusable is your SDK-orchestration code? Did you share a single
 method to load the configuration file for both stack creation/updating
 (Lab 1.3.2) and deletion (Lab 1.3.3)? Did you separate the methods for
 finding existing stacks from the methods that create or update those stacks?
+
+> I did it in bash, I did make separate methods but I kept it as simple as possible.
 
 If not, refactor your Python, Ruby or NodeJS scripts to work in the
 manner described.
