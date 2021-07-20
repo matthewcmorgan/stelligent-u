@@ -1,0 +1,37 @@
+Parameters:
+  IAMPassword:
+    NoEcho: true
+    Default: 'myP@ssw0rd'
+    Description: 'Password for IAM user to be created.'
+    Type: String
+  IAMUsername:
+    Default: 'this.is.a.nice.user.name'
+    Description: 'Username for IAM user to be created.'
+    Type: String
+Resources:
+  NewUserFromCFN:
+    Type: 'AWS::IAM::User'
+    Properties:
+      Path: "/"
+      LoginProfile:
+        Password: !Ref IAMPassword
+      UserName: !Ref IAMUsername
+  NewIAMPolicyFromCFN:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:x-amz-grant-read
+            Resource: arn:aws:s3:::*
+      Users: 
+        - !Ref NewUserFromCFN
+Outputs:
+  NewPolicyArn:
+    Description: The ARN of the Managed Policy
+    Value: !Ref NewIAMPolicyFromCFN
+    Export:
+      Name: NewManagedPolicyArn
+Description: 'Create an IAM User with an IAM Managed Policy allowing Read access to S3.'

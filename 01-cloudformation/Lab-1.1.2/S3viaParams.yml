@@ -1,0 +1,13 @@
+Parameters:
+  BucketNameVar:
+    Default: 'mcm-01-cfn-s3'
+    Description: 'Name of the Bucket to be created. Must be globally-unique.'
+    Type: String
+
+Resources:
+  MyCoolNewS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 
+        Ref: BucketNameVar
+Description: 'Create an S3 Bucket'

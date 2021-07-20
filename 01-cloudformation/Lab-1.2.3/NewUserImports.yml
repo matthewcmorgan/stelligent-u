@@ -1,0 +1,21 @@
+Parameters:
+  Password:
+    NoEcho: true
+    Default: 'myP@ssw0rd'
+    Description: 'Password for IAM user to be created.'
+    Type: String
+  Username:
+    Default: 'this.is.a.nice.user.name'
+    Description: 'Username for IAM user to be created.'
+    Type: String
+Resources:
+  EvenNewerUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      Path: "/"
+      LoginProfile:
+        Password: !Ref Password
+      UserName: !Ref Username
+      ManagedPolicyArns:
+        - !ImportValue NewManagedPolicyArn
+Description: 'Create an IAM User with an IAM Managed Policy imported from another stack.'
