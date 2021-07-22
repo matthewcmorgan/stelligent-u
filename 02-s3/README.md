@@ -105,6 +105,11 @@ Using "aws s3", create a bucket:
 
 - List the contents of the bucket.
 
+> - Make a bucket:
+> - `aws s3 mb s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
+> - List the bucket:
+> - `aws s3 ls s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
+
 #### Lab 2.1.2: Upload Objects to a Bucket
 
 Add an object to your bucket:
@@ -114,6 +119,11 @@ Add an object to your bucket:
 
 - Copy the file to your bucket using the "aws s3" command. Find more
   than one way to upload it.
+
+> - Copy files to bucket using `aws s3 cp`
+> - `aws s3 cp . s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
+> - Copy files to bucket using `aws s3 sync`
+> - `aws s3 sync s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
 
 - List the contents of the bucket after each upload.
 
