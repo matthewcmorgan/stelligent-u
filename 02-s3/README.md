@@ -121,20 +121,26 @@ Add an object to your bucket:
   than one way to upload it.
 
 > - Copy files to bucket using `aws s3 cp`
-> - `aws s3 cp . s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
+> - `aws s3 cp s3params.json s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
 > - Copy files to bucket using `aws s3 sync`
-> - `aws s3 sync s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
+> - `aws s3 sync . s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2'`
 
 - List the contents of the bucket after each upload.
+
+> - `aws s3 ls s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
 
 ##### Question: Copying to Top Level
 
 _How would you copy the contents of the directory to the top level of your bucket?_
 
+> - `aws s3 sync ./data s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
+
 ##### Question: Directory Copying
 
 _How would you copy the contents and include the directory name in the s3 object
 paths?_
+
+> - `aws s3 cp ./data s3://stelligent-u-matthew.morgan.labs --region 'us-west-2' --recursive`
 
 ##### Question: Object Access
 
@@ -142,9 +148,13 @@ _[Can anyone else see your file yet](https://docs.aws.amazon.com/AmazonS3/latest
 
 For further reading, see the S3 [Access Policy Language Overview](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-policy-language-overview.html).
 
+> - File Access is based on the default bucket settings thus far. There have been no policies applied yet. Thus, the answer of "can anyone else see my file yet?" would be no.  Not unless they have more permissions than I, the creator of the file, have. (root AWS account)
+
 ##### Question: Sync vs Copy
 
 _What makes "sync" a better choice than "cp" for some S3 uploads?_
+
+> By default, sync will only move new and updated files, reducing overwrite bandwidth.
 
 #### Lab 2.1.3: Exclude Private Objects When Uploading to a Bucket
 
@@ -153,13 +163,19 @@ bucket again **without including the private file**.
 
 - Verify after uploading that the file doesn't exist in the bucket.
 
+> - `aws s3 sync ./data s3://stelligent-u-matthew.morgan.labs --region 'us-west-2' --exclude 'super-private.txt'`
+> - `aws s3 cp ./data s3://stelligent-u-matthew.morgan.labs -- region 'us-west-2' --exclude 'super-private.txt' --recursive`
+
 - Did you find two different ways to accomplish this task? If not, make sure to
   read the [documentation on sync flags](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+> - Could also use the `--acl` flag on s3 sync, or the `--grants` flag to provide granular access via IAM.
 
 #### Lab 2.1.4: Clean Up
 
 Clean up: remove your bucket. What do you have to do before you can
 remove it?
+
+> - delete the contents with `aws s3 rm s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2' --recursive`
 
 ### Retrospective 2.1
 
