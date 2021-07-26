@@ -168,6 +168,7 @@ bucket again **without including the private file**.
 
 - Did you find two different ways to accomplish this task? If not, make sure to
   read the [documentation on sync flags](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+
 > - Could also use the `--acl` flag on s3 sync, or the `--grants` flag to provide granular access via IAM.
 
 #### Lab 2.1.4: Clean Up
@@ -176,6 +177,7 @@ Clean up: remove your bucket. What do you have to do before you can
 remove it?
 
 > - delete the contents with `aws s3 rm s3://stelligent-u-matthew.morgan.labs/ --region 'us-west-2' --recursive`
+> - delete the bucket with `aws s3 rb s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
 
 ### Retrospective 2.1
 
@@ -201,10 +203,15 @@ directory with the "aws s3 sync" command.
 - Use a "sync" command parameter to make all the files in the bucket
   publicly readable.
 
+> - `aws mb s3://stelligent-u-matthew.morgan.labs --region 'us-west-2'`
+> - `aws s3 sync ./data s3://stelligent-u-matthew.morgan.labs --acl public-read --region 'us-west-2'`
+
 ##### Question: Downloading Protection
 
 _After this, can you download one of your files from the bucket without using
 your API credentials?_
+
+> yes.
 
 #### Lab 2.2.2: Use the CLI to Restrict Access to Private Data
 
@@ -212,16 +219,22 @@ You just made "private.txt" publicly readable. Ensure that only the
 bucket owner can read or write that file without changing the
 permissions of the other files.
 
+> - `aws s3api put-object-acl --acl private --bucket stelligent-u-matthew.morgan.labs --key super-private.txt --region 'us-west-2'`
+
 ##### Question: Modify Permissions
 
 _How could you use "aws s3 cp" or "aws s3 sync" command to modify the
 permissions on the file?_
+
+> - `aws s3 sync super-private.txt s3://stelligent-u-matthew.morgan.labs --acl private --region 'us-west-2'`
 
 (Hint: see the list of [Canned ACLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl).)
 
 ##### Question: Changing Permissions
 
 _Is there a way you can change the permissions on the file without re-uploading it?_
+
+> - `aws s3api put-object-acl --acl private --bucket stelligent-u-matthew.morgan.labs --key super-private.txt --region 'us-west-2'`
 
 #### Lab 2.2.3: Using the API from the CLI
 
