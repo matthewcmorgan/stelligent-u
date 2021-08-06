@@ -242,6 +242,9 @@ The [aws s3api command](https://docs.aws.amazon.com/cli/latest/reference/s3api/i
 gives you a lot more options. Remove the bucket again, then recreate it
 to start fresh.
 
+> - `aws s3 rm s3://stelligent-u-matthew.morgan.labs/ --region us-west-2 --recursive`
+> - `aws s3api create-bucket --bucket stelligent-u-matthew.morgan.labs --region us-west-2 --acl public-read --create-bucket-configuration LocationConstraint='us-west-2'`
+
 Make all files publicly readable, grant yourself access to do anything
 to all files, and block access to "private.txt" unless you're an
 authenticated user:
@@ -249,10 +252,16 @@ authenticated user:
 - Create and assign an IAM policy to explicitly grant yourself
   maintenance access.
 
+> - This isn't necessary, as you can grant full control to the Owner.ID.
+
 - Set a bucket policy to grant public read access.
+
+> - `aws s3api put-bucket-acl --bucket stelligent-u-matthew.morgan.labs --region us-west-2 --grant-full-control id=325cbed028b3247baa4404c5c980cc7554f85fc72bd5140692f3b781beedeb33  --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers`
 
 - Set an S3 ACL on "private.txt" to block read access unless you're
   authenticated.
+
+> - `aws s3api put-object-acl --bucket MyBucket --key file.txt --grant-full-control emailaddress=user1@example.com,emailaddress=user2@example.com --grant-read uri=http://acs.amazonaws.com/groups/global/AllUsers`
 
 When you're done, verify that anybody (e.g. you, unauthenticated) can
 read most files but can't read "private.txt", and only you can modify
